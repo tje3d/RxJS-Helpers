@@ -1,12 +1,27 @@
 import * as RX from 'rxjs';
 import * as constants from '../consts';
 
+let failureCount = 0;
+
 export default RX.Observable.timer(0, 1000)
-    .throttleTime(12000)
+    .throttle(() => {
+        let timer = failureCount == 0 ? 12000 : (failureCount / 2 * 12000) + 12000;
+        timer = timer > 30000 ? 30000 : timer;
+        return RX.Observable.interval(timer);
+    })
     .switchMap(
         () => sendPingRequest()
-            .catch(() => RX.Observable.of(false))
-            .map((input: boolean) => input)
+            .catch(() => {
+                failureCount++;
+                return RX.Observable.of(false);
+            })
+            .map((input: boolean) => {
+                if (input !== false) {
+                    failureCount = 0;
+                }
+
+                return input;
+            })
     )
     .startWith(true)
     .pairwise()
