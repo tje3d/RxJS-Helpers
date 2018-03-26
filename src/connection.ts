@@ -1,10 +1,10 @@
 import * as RX from 'rxjs';
-import * as constants from '../consts';
+import * as constants from './other/consts';
 
 let failureCount = 0;
 
 // An observable which emits every second
-let runEverySecond$     = RX.Observable.timer(0, 1000);
+let runEverySecond$ = RX.Observable.timer(0, 1000);
 
 // Throttle emitions based on failureCount
 let throttleBasedOnFailure$ = runEverySecond$.throttle(() => {
